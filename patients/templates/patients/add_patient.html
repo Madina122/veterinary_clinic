@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Новый пациент - Ветеринарная Клиника{% endblock %}
+
+{% block page_title %}
+<span style="color: #2e7d32;"><i class="bi bi-plus-circle me-2"></i>Новый пациент</span>
+{% endblock %}
+
+{% block page_subtitle %}
+Зарегистрируйте нового питомца в нашей клинике
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="vet-card">
+            <div class="vet-card-header">
+                <h4 class="mb-0"><i class="bi bi-file-earmark-medical me-2"></i>Регистрация пациента</h4>
+            </div>
+            <div class="card-body">
+                {% if success %}
+                <div class="alert alert-success alert-vet fade-in">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill display-6 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Пациент успешно добавлен!</h5>
+                            <p class="mb-0">ID пациента: <strong>{{ patient_id }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="alert alert-danger alert-vet fade-in">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill display-6 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Ошибка!</h5>
+                            <p class="mb-0">{{ error }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Кличка животного *</label>
+                            <input type="text" class="form-control form-control-custom" name="name" required 
+                                   placeholder="Например: Барсик, Шарик">
+                            <div class="form-text">Введите кличку питомца</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Вид животного *</label>
+                            <select class="form-select form-control-custom" name="animal_type" required>
+                                <option value="">Выберите вид</option>
+                                <option value="dog">🐶 Собака</option>
+                                <option value="cat">🐱 Кошка</option>
+                                <option value="bird">🐦 Птица</option>
+                                <option value="rabbit">🐰 Кролик</option>
+                                <option value="other">🐾 Другое</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Порода</label>
+                        <input type="text" class="form-control form-control-custom" name="breed" 
+                               placeholder="Например: Сиамская, Немецкая овчарка">
+                        <div class="form-text">Укажите породу, если известна</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Возраст (лет) *</label>
+                            <input type="number" class="form-control form-control-custom" name="age" 
+                                   min="0" max="50" required placeholder="0">
+                            <div class="form-text">Примерный возраст в годах</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Имя владельца *</label>
+                            <input type="text" class="form-control form-control-custom" name="owner_name" required
+                                   placeholder="Иван Иванов">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Телефон владельца *</label>
+                        <input type="tel" class="form-control form-control-custom" name="owner_phone" required
+                               placeholder="+7 (999) 123-45-67">
+                        <div class="form-text">Для связи в случае экстренной ситуации</div>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-vet-primary btn-lg px-5">
+                            <i class="bi bi-save me-2"></i>Зарегистрировать пациента
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <a href="/patients/" class="btn btn-outline-primary">
+                        <i class="bi bi-people me-2"></i>Все пациенты
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

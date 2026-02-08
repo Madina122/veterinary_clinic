@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block title %}Медицинская карточка - {{ patient.name }}{% endblock %}
+
+{% block page_title %}
+<span style="color: #2e7d32;"><i class="bi bi-clipboard-pulse me-2"></i>Медицинская карточка: {{ patient.name }}</span>
+{% endblock %}
+
+{% block page_subtitle %}
+{{ patient.get_animal_type_display }} • {{ patient.breed|default:"Порода не указана" }}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .record-card {
+        border-left: 4px solid;
+        margin-bottom: 15px;
+        transition: all 0.3s;
+        border: none;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .record-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .record-examination { 
+        border-left-color: #0d6efd; 
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    }
+    .record-vaccination { 
+        border-left-color: #198754; 
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    }
+    .record-surgery { 
+        border-left-color: #dc3545; 
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    }
+    .record-treatment { 
+        border-left-color: #fd7e14; 
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    }
+    .record-test { 
+        border-left-color: #6f42c1; 
+        background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    }
+    .record-other { 
+        border-left-color: #6c757d; 
+        background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+    }
+    
+    .badge-type {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+    }
+    .patient-info-card {
+        height: 100%;
+    }
+    .patient-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 10px 10px 0 0;
+    }
+    .animal-icon-large {
+        font-size: 4rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap gap-2">
+
+            <a href="/patients/" class="btn btn-outline-primary">
+                <i class="bi bi-people me-2"></i>Все пациенты
+            </a>
+            <a href="/appointments/book/?patient_id={{ patient.id }}" class="btn btn-vet-primary">
+                <i class="bi bi-calendar-plus me-2"></i>Запись на прием
+            </a>
+            <a href="/api/medical-records/?patient_id={{ patient.id }}" class="btn btn-outline-info" target="_blank">
+                <i class="bi bi-code-slash me-2"></i>API данные
+            </a>
+            <a href="/admin/patients/patient/{{ patient.id }}/change/" class="btn btn-outline-dark" target="_blank">
+                <i class="bi bi-pencil me-2"></i>Редактировать
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- The left side -->
+    <div class="col-lg-4 mb-4">
+        <div class="vet-card patient-info-card">
+            <div class="patient-header">
+                <div class="text-center">
+                    {% if patient.animal_type == 'dog' %}
+                        <div class="animal-icon-large">🐶</div>
+                    {% elif patient.animal_type == 'cat' %}
+                        <div class="animal-icon-large">🐱</div>
+                    {% elif patient.animal_type == 'bird' %}
+                        <div class="animal-icon-large">🐦</div>
+                    {% elif patient.animal_type == 'rabbit' %}
+                        <div class="animal-icon-large">🐰</div>
+                    {% else %}
+                        <div class="animal-icon-large">🐾</div>
+                    {% endif %}
+                    <h4 class="mb-2">{{ patient.name }}</h4>
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge bg-light text-dark">{{ patient.get_animal_type_display }}</span>
+                        {% if patient.breed %}
+                        <span class="badge bg-light text-dark">{{ patient.breed }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-6 text-center">
+                        <div class="stat-number">{{ patient.age }}</div>
+                        <div class="stat-label">Возраст (лет)</div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <div class="stat-number">{{ medical_records|length }}</div>
+                        <div class="stat-label">Мед. записей</div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h6><i class="bi bi-person me-2"></i>Информация о владельце</h6>
+                <div class="mb-3">
+                    <p class="mb-1"><strong>Имя:</strong> {{ patient.owner_name }}</p>
+                    <p class="mb-0"><strong>Телефон:</strong> {{ patient.owner_phone }}</p>
+                </div>
+                
+                <div class="mb-3">
+                    <p class="mb-1">
+                        <strong><i class="bi bi-calendar me-2"></i>Зарегистрирован:</strong><br>
+                        {{ patient.created_at|date:"d.m.Y H:i" }}
+                    </p>
+                </div>
+                
+                <hr>
+                
+                <h6><i class="bi bi-shield-check me-2"></i>Вакцинации</h6>
+                {% if vaccinations %}
+                    <div class="mt-2">
+                        {% for vacc in vaccinations|slice:":3" %}
+                        <div class="alert alert-success p-2 mb-2 small">
+                            <strong>{{ vacc.vaccine_name }}</strong><br>
+                            <small>{{ vacc.administration_date|date:"d.m.Y" }}</small>
+                        </div>
+                        {% endfor %}
+                        {% if vaccinations|length > 3 %}
+                        <p class="text-muted small mb-0">... и еще {{ vaccinations|length|add:"-3" }}</p>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-0">Вакцинаций не зарегистрировано</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- future vaccine -->
+        {% if upcoming_vaccinations %}
+        <div class="vet-card mt-4 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0"><i class="bi bi-exclamation-triangle me-2"></i>Предстоящие вакцинации</h6>
+            </div>
+            <div class="card-body">
+                {% for vacc in upcoming_vaccinations %}
+                <div class="alert alert-warning p-2 mb-2">
+                    <strong>{{ vacc.vaccine_name }}</strong><br>
+                    <small>Следующая: {{ vacc.next_vaccination_date|date:"d.m.Y" }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- The right side -->
+    <div class="col-lg-8">
+        <div class="vet-card">
+            <div class="vet-card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-journal-text me-2"></i>Медицинские записи</h4>
+                <a href="#add-record" class="btn btn-vet-primary btn-sm">
+                    <i class="bi bi-plus-circle me-2"></i>Добавить запись
+                </a>
+            </div>
+            <div class="card-body">
+                {% if medical_records %}
+                    {% for record in medical_records %}
+                    <div class="card record-card record-{{ record.record_type }} mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="card-title mb-1">
+                                        <span class="badge bg-primary badge-type me-2">
+                                            {{ record.get_record_type_display }}
+                                        </span>
+                                        {{ record.title }}
+                                    </h6>
+                                    <p class="card-text text-muted small mb-2">
+                                        <i class="bi bi-calendar me-1"></i> 
+                                        {{ record.record_date|date:"d.m.Y H:i" }}
+                                        {% if record.veterinarian %}
+                                        • <i class="bi bi-person-badge me-1"></i> {{ record.veterinarian.full_name }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    {% if record.temperature %}
+                                    <span class="badge bg-info me-1" data-bs-toggle="tooltip" title="Температура">
+                                        <i class="bi bi-thermometer"></i> {{ record.temperature }}°C
+                                    </span>
+                                    {% endif %}
+                                    {% if record.weight %}
+                                    <span class="badge bg-info" data-bs-toggle="tooltip" title="Вес">
+                                        <i class="bi bi-speedometer2"></i> {{ record.weight }}кг
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            {% if record.description %}
+                            <p class="card-text mt-2">{{ record.description }}</p>
+                            {% endif %}
+                            
+                            {% if record.diagnosis %}
+                            <div class="alert alert-secondary py-2 my-2">
+                                <strong><i class="bi bi-clipboard-check me-1"></i>Диагноз:</strong> 
+                                {{ record.diagnosis }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if record.treatment %}
+                            <div class="alert alert-success py-2 my-2">
+                                <strong><i class="bi bi-prescription me-1"></i>Лечение:</strong> 
+                                {{ record.treatment }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if record.prescription %}
+                            <div class="alert alert-info py-2 my-2">
+                                <strong><i class="bi bi-capsule me-1"></i>Назначения:</strong> 
+                                {{ record.prescription }}
+                            </div>
+                            {% endif %}
+                            
+                            {% if record.notes %}
+                            <p class="card-text small text-muted mt-2">
+                                <i class="bi bi-chat me-1"></i> {{ record.notes }}
+                            </p>
+                            {% endif %}
+                            
+                            {% if record.symptoms %}
+                            <div class="mt-2">
+                                <strong class="small">Симптомы:</strong>
+                                <p class="small text-muted mb-0">{{ record.symptoms }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-clipboard-x display-4 text-muted mb-3"></i>
+                        <h5 class="text-muted">Медицинских записей пока нет</h5>
+                        <p class="text-muted">Добавьте первую запись для этого пациента</p>
+                        <a href="#add-record" class="btn btn-vet-primary mt-2">
+                            <i class="bi bi-plus-circle me-2"></i>Добавить первую запись
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- the entry form -->
+        <div class="vet-card mt-4" id="add-record">
+            <div class="vet-card-header">
+                <h4 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Добавить медицинскую запись</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'add_medical_record' patient.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Тип записи *</label>
+                            <select class="form-select form-control-custom" name="record_type" required>
+                                <option value="">Выберите тип записи</option>
+                                <option value="examination">Осмотр</option>
+                                <option value="vaccination">Вакцинация</option>
+                                <option value="treatment">Лечение</option>
+                                <option value="test">Анализ/Тест</option>
+                                <option value="diagnostic">Диагностика</option>
+                                <option value="prescription">Назначение</option>
+                                <option value="other">Другое</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Заголовок *</label>
+                            <input type="text" class="form-control form-control-custom" name="title" required 
+                                   placeholder="Например: Плановый осмотр, Вакцинация от бешенства">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Описание *</label>
+                        <textarea class="form-control form-control-custom" name="description" rows="3" required
+                                  placeholder="Опишите состояние животного, проведенные процедуры и т.д."></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Температура (°C)</label>
+                            <input type="number" step="0.1" class="form-control form-control-custom" 
+                                   name="temperature" placeholder="38.5">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Вес (кг)</label>
+                            <input type="number" step="0.1" class="form-control form-control-custom" 
+                                   name="weight" placeholder="4.2">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Пульс (уд/мин)</label>
+                            <input type="number" class="form-control form-control-custom" 
+                                   name="heart_rate" placeholder="120">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Симптомы</label>
+                            <textarea class="form-control form-control-custom" name="symptoms" rows="2"
+                                      placeholder="Опишите наблюдаемые симптомы"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Диагноз</label>
+                            <textarea class="form-control form-control-custom" name="diagnosis" rows="2"
+                                      placeholder="Установленный диагноз"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Лечение</label>
+                            <textarea class="form-control form-control-custom" name="treatment" rows="2"
+                                      placeholder="Назначенное лечение"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Назначения/Рецепт</label>
+                            <textarea class="form-control form-control-custom" name="prescription" rows="2"
+                                      placeholder="Выписанные препараты"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Дата и время записи *</label>
+                            <input type="datetime-local" class="form-control form-control-custom" 
+                                   name="record_date" required id="record-date">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Дополнительные заметки</label>
+                            <textarea class="form-control form-control-custom" name="notes" rows="2"
+                                      placeholder="Дополнительная информация"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-vet-primary btn-lg px-5">
+                            <i class="bi bi-save me-2"></i>Сохранить медицинскую запись
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="#" class="btn btn-outline-secondary" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
+        <i class="bi bi-arrow-up me-2"></i>Наверх
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Date and time
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.getElementById('record-date').value = localDateTime;
+    
+    // Init tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+
+// right scroll
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

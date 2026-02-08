@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+
+{% block title %}Запись на прием - Ветеринарная Клиника{% endblock %}
+
+{% block page_title %}
+<span style="color: #2e7d32;"><i class="bi bi-calendar-plus me-2"></i>Запись на прием</span>
+{% endblock %}
+
+{% block page_subtitle %}
+Запишите вашего питомца на прием к ветеринару
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="vet-card">
+            <div class="vet-card-header">
+                <h4 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Новая запись на прием</h4>
+            </div>
+            <div class="card-body">
+                {% if success %}
+                <div class="alert alert-success alert-vet">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill display-6 me-3" style="color: #2e7d32;"></i>
+                        <div>
+                            <h5 class="mb-1" style="color: #1b5e20;">Запись успешно создана!</h5>
+                            <p class="mb-0 text-dark">Номер записи: <strong class="text-dark-green">{{ appointment_id }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if error %}
+                <div class="alert alert-danger alert-vet">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle-fill display-6 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Ошибка при создании записи!</h5>
+                            <p class="mb-0">{{ error }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="mb-3" style="color: #2e7d32;">
+                                <i class="bi bi-person-circle me-2"></i>1. Выберите пациента
+                            </h5>
+                            <select class="form-select form-control-custom" name="patient_id" required>
+                                <option value="">Выберите пациента</option>
+                                {% for patient in patients %}
+                                <option value="{{ patient.id }}">
+                                    {{ patient.name }} ({{ patient.get_animal_type_display }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="mt-3">
+                                <a href="/add/" class="btn btn-sm btn-vet-secondary">
+                                    <i class="bi bi-plus-circle me-1"></i>Добавить нового пациента
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="mb-3" style="color: #2e7d32;">
+                                <i class="bi bi-person-badge me-2"></i>2. Выберите ветеринара
+                            </h5>
+                            <select class="form-select form-control-custom" name="veterinarian_id" required>
+                                <option value="">Выберите ветеринара</option>
+                                {% for vet in veterinarians %}
+                                <option value="{{ vet.id }}">
+                                    {{ vet.full_name }} - {{ vet.get_specialization_display }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    <a href="#doctors-section" class="text-decoration-none" style="color: #2e7d32;">
+                                        Посмотреть информацию о специалистах
+                                    </a>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="mb-3" style="color: #2e7d32;">
+                            <i class="bi bi-clock me-2"></i>3. Дата и время приема
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Дата</label>
+                                <input type="date" class="form-control form-control-custom" name="date" required 
+                                       min="{{ today }}" value="{{ today }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Время</label>
+                                <select class="form-select form-control-custom" name="time" required>
+                                    <option value="">Выберите время</option>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="12:00">12:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="mb-3" style="color: #2e7d32;">
+                            <i class="bi bi-chat-text me-2"></i>4. Причина обращения
+                        </h5>
+                        <textarea class="form-control form-control-custom" name="reason" rows="4" 
+                                  placeholder="Опишите симптомы или причину визита. Например: 'Кашель у собаки', 'Плановый осмотр', 'Вакцинация'"></textarea>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <button type="submit" class="btn btn-vet-primary btn-lg px-5 py-3">
+                            <i class="bi bi-calendar-check me-2"></i>Записаться на прием
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-5" style="border-color: #c8e6c9;">
+
+                <div class="text-center">
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+
+                        <a href="/patients/" class="btn btn-outline-primary px-4">
+                            <i class="bi bi-people me-2"></i>Все пациенты
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctors information -->
+        <div class="vet-card mt-5" id="doctors-section">
+            <div class="vet-card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-person-badge me-2"></i>Наши специалисты</h4>
+                <span class="badge badge-vet">{{ veterinarians|length }} специалистов</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for vet in veterinarians %}
+                    <div class="col-md-6 mb-4">
+                        <div class="doctor-card p-3 rounded border" style="border-color: #c8e6c9 !important; background: linear-gradient(135deg, rgba(232, 245, 233, 0.3) 0%, white 100%);">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                    <div class="rounded-circle p-3 d-flex align-items-center justify-content-center" 
+                                         style="background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%); width: 70px; height: 70px;">
+                                        <i class="bi bi-person-hearts fs-3 text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <h6 class="mb-1" style="color: #1b5e20;">{{ vet.full_name }}</h6>
+                                            <p class="text-muted small mb-2">
+                                                <span class="badge" style="background-color: #81c784; color: white;">
+                                                    {{ vet.get_specialization_display }}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="doctor-info">
+                                        <div class="d-flex flex-wrap gap-3 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-briefcase me-2" style="color: #2e7d32;"></i>
+                                                <small>Стаж: <strong>{{ vet.experience_years }} лет</strong></small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-telephone me-2" style="color: #2e7d32;"></i>
+                                            <small><strong>{{ vet.phone }}</strong></small>
+                                        </div>
+                                        
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-envelope me-2" style="color: #2e7d32;"></i>
+                                            <small class="text-truncate">{{ vet.email }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 pt-3 border-top" style="border-color: #c8e6c9 !important;">
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">
+                                        <i class="bi bi-heart me-1"></i>
+                                        Специализация:
+                                    </small>
+                                    <small style="color: #2e7d32; font-weight: 500;">
+                                        {% if vet.specialization == 'surgeon' %}
+                                        Хирургия, операции
+                                        {% elif vet.specialization == 'therapist' %}
+                                        Терапия, диагностика
+                                        {% elif vet.specialization == 'ophthalmologist' %}
+                                        Офтальмология
+                                        {% elif vet.specialization == 'dermatologist' %}
+                                        Дерматология
+                                        {% else %}
+                                        Общая практика
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <div class="alert alert-vet" style="background-color: rgba(129, 199, 132, 0.1); border-left: 4px solid #4caf50;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle me-3" style="color: #2e7d32; font-size: 1.5rem;"></i>
+                            <div class="text-start">
+                                <h6 class="mb-1" style="color: #1b5e20;">Важная информация</h6>
+                                <p class="mb-0 text-muted">
+                                    Среднее время ожидания приема: <strong>15-20 минут</strong>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-dark-green {
+        color: #1b5e20;
+        font-weight: 600;
+    }
+    
+    .doctor-card {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .doctor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(46, 125, 50, 0.15);
+        border-color: #4caf50 !important;
+    }
+    
+    .doctor-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(to bottom, #2e7d32, #4caf50);
+    }
+    
+    .form-control-custom:focus {
+        border-color: #4caf50;
+        box-shadow: 0 0 0 0.25rem rgba(76, 175, 80, 0.25);
+    }
+    
+    .btn-vet-secondary {
+        background-color: white;
+        color: #2e7d32;
+        border: 2px solid #2e7d32;
+        padding: 0.4rem 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-vet-secondary:hover {
+        background-color: #2e7d32;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    select.form-control-custom option {
+        padding: 10px;
+    }
+    
+    select.form-control-custom option:hover {
+        background-color: #e8f5e9;
+    }
+    
+    textarea.form-control-custom {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .alert-vet {
+        border-radius: 12px;
+        border: none;
+        padding: 1.2rem 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.querySelector('input[name="date"]');
+    dateInput.min = today;
+    
+    if (!dateInput.value) {
+        dateInput.value = today;
+    }
+    
+    const doctorsLink = document.querySelector('a[href="#doctors-section"]');
+    if (doctorsLink) {
+        doctorsLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('doctors-section').scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        });
+    }
+    
+    const timeSelect = document.querySelector('select[name="time"]');
+    if (timeSelect) {
+        timeSelect.addEventListener('change', function() {
+            this.style.backgroundColor = this.value ? '#e8f5e9' : '';
+        });
+    }
+});
+</script>
+{% endblock %}

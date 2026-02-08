@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Ветеринарная Клиника{% endblock %}
+
+{% block page_title %}
+<span style="color: #2e7d32;"><i class="bi bi-heart-pulse me-2"></i>Добро пожаловать в Car-carich!</span>
+{% endblock %}
+
+{% block page_subtitle %}
+Профессиональная ветеринарная помощь для ваших питомцев
+{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-md-4 mb-4">
+        <a href="/add/" class="text-decoration-none">
+            <div class="vet-card feature-card" style="animation-delay: 0.1s; cursor: pointer;">
+                <div class="feature-icon pulse-animation">
+                    <i class="bi bi-plus-circle"></i>
+                </div>
+                <h4 class="text-dark-green">Новый пациент</h4>
+                <p class="text-nature-brown">Зарегистрируйте нового питомца в клинике</p>
+                <div class="btn btn-vet-primary mt-3">
+                    <i class="bi bi-plus-circle me-2"></i>Добавить пациента
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <a href="/appointments/book/" class="text-decoration-none">
+            <div class="vet-card feature-card" style="animation-delay: 0.2s; cursor: pointer;">
+                <div class="feature-icon pulse-animation" style="animation-delay: 0.5s;">
+                    <i class="bi bi-calendar-plus"></i>
+                </div>
+                <h4 class="text-dark-green">Запись к врачу</h4>
+                <p class="text-nature-brown">Запишитесь на прием к ветеринарному специалисту</p>
+                <div class="btn btn-vet-primary mt-3">
+                    <i class="bi bi-calendar-plus me-2"></i>Записаться
+                </div>
+            </div>
+        </a>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <a href="/patients/" class="text-decoration-none">
+            <div class="vet-card feature-card" style="animation-delay: 0.3s; cursor: pointer;">
+                <div class="feature-icon pulse-animation" style="animation-delay: 1s;">
+                    <i class="bi bi-clipboard-pulse"></i>
+                </div>
+                <h4 class="text-dark-green">Мед. карты</h4>
+                <p class="text-nature-brown">Просмотр медицинских карточек пациентов</p>
+                <div class="btn btn-vet-primary mt-3">
+                    <i class="bi bi-clipboard-pulse me-2"></i>Все пациенты
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="vet-card">
+            <div class="vet-card-header">
+                <h4 class="mb-0"><i class="bi bi-graph-up me-2"></i>Статистика клиники</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="stat-card stat-card-primary text-center">
+                            <div class="stat-number">{{ total_patients }}</div>
+                            <div class="stat-label">Пациентов</div>
+                            <div class="mt-2">
+                                <i class="bi bi-people-fill" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="stat-card stat-card-success text-center">
+                            <div class="stat-number">{{ today_appointments }}</div>
+                            <div class="stat-label">Записей сегодня</div>
+                            <div class="mt-2">
+                                <i class="bi bi-calendar-check" style="color: var(--success-color); font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="stat-card stat-card-warning text-center">
+                            <div class="stat-number">{{ upcoming_appointments|length }}</div>
+                            <div class="stat-label">Предстоящих записей</div>
+                            <div class="mt-2">
+                                <i class="bi bi-calendar-event" style="color: var(--warning-color); font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 mb-3">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-left: 5px solid #2196f3;">
+                            <div class="stat-number text-info">{{ total_vaccinations }}</div>
+                            <div class="stat-label">Вакцинаций</div>
+                            <div class="mt-2">
+                                <i class="bi bi-shield-check" style="color: #2196f3; font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-6 mb-4">
+        <div class="vet-card h-100">
+            <div class="vet-card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Пациенты по типам</h4>
+                <span class="badge bg-light text-dark-green">{{ patients_by_type|length }} категорий</span>
+            </div>
+            <div class="card-body">
+                {% if patients_by_type %}
+                <div class="table-responsive">
+                    <table class="table table-vet table-hover">
+                        <thead>
+                            <tr>
+                                <th>Тип животного</th>
+                                <th class="text-end">Количество пациентов</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in patients_by_type %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if item.animal_type == 'dog' %}
+                                        <div class="animal-emoji me-3">🐶</div>
+                                        <strong>Собаки</strong>
+                                        {% elif item.animal_type == 'cat' %}
+                                        <div class="animal-emoji me-3">🐱</div>
+                                        <strong>Кошки</strong>
+                                        {% elif item.animal_type == 'bird' %}
+                                        <div class="animal-emoji me-3">🐦</div>
+                                        <strong>Птицы</strong>
+                                        {% elif item.animal_type == 'rabbit' %}
+                                        <div class="animal-emoji me-3">🐰</div>
+                                        <strong>Кролики</strong>
+                                        {% else %}
+                                        <div class="animal-emoji me-3">🐾</div>
+                                        <strong>Другие</strong>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <strong>{{ item.count }}</strong>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-active">
+                                <td><strong>Всего пациентов:</strong></td>
+                                <td class="text-end"><strong>{{ total_patients }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <div class="empty-state-icon mb-3">
+                        <i class="bi bi-bar-chart text-muted display-3 opacity-50"></i>
+                    </div>
+                    <h5 class="text-dark-green">Нет данных для отображения</h5>
+                    <p class="text-nature-brown">Зарегистрируйте первого пациента, чтобы увидеть статистику</p>
+                    <a href="/add/" class="btn btn-vet-secondary mt-2">
+                        <i class="bi bi-plus-circle me-2"></i>Добавить первого пациента
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="vet-card h-100">
+            <div class="vet-card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Ближайшие записи</h4>
+                <span class="badge bg-light text-dark-green">{{ upcoming_appointments|length }} записей</span>
+            </div>
+            <div class="card-body p-0">
+                {% if upcoming_appointments %}
+                <div class="list-group list-group-flush">
+                    {% for appointment in upcoming_appointments %}
+                    <a href="{% url 'appointment_detail' appointment.id %}" 
+                       class="list-group-item list-group-item-action border-0 px-4 py-3 appointment-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1 text-dark-green">{{ appointment.patient.name }}</h6>
+                                <small class="text-muted">
+                                    <i class="bi bi-clock me-1"></i>
+                                    {{ appointment.appointment_date|date:"d.m.Y H:i" }}
+                                </small>
+                            </div>
+                            <div>
+                                <span class="badge bg-{% if appointment.status == 'scheduled' %}info{% else %}success{% endif %} rounded-pill px-3 py-1">
+                                    <i class="bi {% if appointment.status == 'scheduled' %}bi-clock{% else %}bi-check-circle{% endif %} me-1"></i>
+                                    {{ appointment.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <small class="text-nature-brown">
+                                <i class="bi bi-person-badge me-1"></i>
+                                {{ appointment.veterinarian.full_name }}
+                            </small>
+                        </div>
+                        {% if appointment.reason %}
+                        <div class="mt-2 p-2 rounded appointment-reason">
+                            <small class="text-nature-brown">
+                                <i class="bi bi-chat-left-text me-1"></i>
+                                {{ appointment.reason|truncatechars:80 }}
+                            </small>
+                        </div>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 px-3">
+                    <div class="empty-state-icon mb-3">
+                        <i class="bi bi-calendar-x text-muted display-3 opacity-50"></i>
+                    </div>
+                    <h5 class="text-dark-green">Нет предстоящих записей</h5>
+                    <p class="text-nature-brown">Запланируйте визит к ветеринару для вашего питомца</p>
+                    <a href="/appointments/book/" class="btn btn-vet-primary mt-2">
+                        <i class="bi bi-calendar-plus me-2"></i>Создать первую запись
+                    </a>
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <i class="bi bi-lightbulb me-1"></i>
+                            Рекомендуем записываться заранее
+                        </small>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .animal-emoji {
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(129, 199, 132, 0.2);
+        border-radius: 50%;
+    }
+    
+    .text-dark-green {
+        color: var(--dark-green);
+    }
+    
+    .text-nature-brown {
+        color: var(--nature-brown);
+    }
+    
+    .border-light-green {
+        border-color: var(--light-green) !important;
+    }
+    
+    .empty-state-icon {
+        position: relative;
+        display: inline-block;
+    }
+    
+    .empty-state-icon::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 80px;
+        height: 80px;
+        background: radial-gradient(circle, rgba(129, 199, 132, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+</style>
+
+
+{% endblock %}

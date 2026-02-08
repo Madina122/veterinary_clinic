@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Запись #{{ appointment.id }} - Ветеринарная Клиника{% endblock %}
+
+{% block page_title %}
+<span style="color: #2e7d32;"><i class="bi bi-calendar-event me-2"></i>Запись #{{ appointment.id }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="vet-card">
+            <div class="vet-card-header">
+                <h4 class="mb-0">Детали записи</h4>
+            </div>
+            <div class="card-body p-4">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6 class="text-nature-brown mb-2"><i class="bi bi-person me-2"></i>Пациент</h6>
+                            <p class="h5 text-dark-green">{{ appointment.patient.name }}</p>
+                            <small class="text-muted">Порода: {{ appointment.patient.breed }}</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6 class="text-nature-brown mb-2"><i class="bi bi-person-badge me-2"></i>Ветеринар</h6>
+                            <p class="h5 text-dark-green">{{ appointment.veterinarian.full_name }}</p>
+                            <small class="text-muted">{{ appointment.veterinarian.specialization }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6 class="text-nature-brown mb-2"><i class="bi bi-calendar-date me-2"></i>Дата и время</h6>
+                            <p class="h5 text-dark-green">{{ appointment.appointment_date|date:"d.m.Y H:i" }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <h6 class="text-nature-brown mb-2"><i class="bi bi-info-circle me-2"></i>Статус</h6>
+                            <span class="badge {% if appointment.status == 'scheduled' %}bg-info{% elif appointment.status == 'completed' %}bg-success{% else %}bg-warning{% endif %} px-3 py-2">
+                                {{ appointment.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if appointment.reason %}
+                <div class="mb-4">
+                    <h6 class="text-nature-brown mb-2"><i class="bi bi-chat-left-text me-2"></i>Причина визита</h6>
+                    <div class="p-3 rounded bg-light-green">
+                        <p class="mb-0">{{ appointment.reason }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if appointment.notes %}
+                <div class="mb-4">
+                    <h6 class="text-nature-brown mb-2"><i class="bi bi-journal-text me-2"></i>Заметки</h6>
+                    <div class="p-3 rounded bg-light-green">
+                        <p class="mb-0">{{ appointment.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="/" class="btn btn-vet-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>На главную
+                    </a>
+                    <a href="{% url 'book_appointment' %}" class="btn btn-vet-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Новая запись
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
