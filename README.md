@@ -219,7 +219,7 @@ Chapanova Madina Ruslanovna
 Student of National Research University Higher School of Economics (MIEM)
 
 Contact information:
-- Email: mrchaoanova@edu.hse.ru
+- Email: tchapanovamad@yandex.ru
 - Telegram: @chrMadina
 
 Created: February 08, 2026
