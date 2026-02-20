@@ -94,5 +94,5 @@ class Appointment(models.Model):
     
     @property
     def duration_minutes(self):
-        """Продолжительность приема (можно расширить)"""
+        """Продолжительность приема"""
         return 30 
