@@ -88,7 +88,6 @@ class Appointment(models.Model):
     
     @property
     def is_upcoming(self):
-        """Проверяет, является ли прием будущим"""
         from django.utils import timezone
         return self.appointment_date > timezone.now() and self.status in ['scheduled', 'confirmed']
     
